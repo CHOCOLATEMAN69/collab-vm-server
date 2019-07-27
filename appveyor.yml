@@ -1,5 +1,6 @@
 image: Visual Studio 2019
 platform: x64
+skip_tags: true
 environment:
   # Always save the cache because there isn't enough time
   # to build both the dependencies and the collab-vm-server
@@ -29,3 +30,11 @@ build_script:
 artifacts:
   - path: install/
     name: collab-vm-server
+deploy:
+  provider: GitHub
+  tag: prerelease
+  description: ''
+  artifact: collab-vm-server
+  prerelease: true
+  auth_token:
+    secure: /1wKmhBRo1sCNw9MG237fBihMhCJIMVajWI4BgTKQm39r7J6StfkJFg26TVkK/Qv
