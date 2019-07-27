@@ -8,20 +8,35 @@ sudo: required
 services:
 - docker
 before_install:
-- git clone --depth=1 https://github.com/Microsoft/vcpkg.git ../vcpkg/
+- |
+  mkdir ../vcpkg/
+  pushd ../vcpkg/
+  git init
+  git remote add origin https://github.com/Microsoft/vcpkg.git
+  git fetch origin master
+  git checkout -b master origin/master
+  cp triplets/x64-linux.cmake triplets/x64-linux-musl.cmake
+  echo 'set(CMAKE_SYSROOT /x86_64-linux-musl/)' >> scripts/toolchains/linux.cmake
+  popd
 # HACK: Lower the required version of cmake because apk doesn't have 3.14
 - sed -i -e 's/3\.14\.0/3.13.0/g' ../vcpkg/scripts/vcpkgTools.xml
 # Prevent FreeRDP from changing RPATH
 - sed -i -e '/RPATH/d' submodules/FreeRDP/CMakeLists.txt
-- docker run -dit --name musl -v $(pwd)/../vcpkg:/src/vcpkg -v $(pwd):/src/collab-vm-server muslcc/x86_64:x86_64-linux-musl sh
+- docker run -dit --name musl -v $(pwd)/../vcpkg:/src/vcpkg/ -v $(pwd):/src/collab-vm-server/ muslcc/x86_64:x86_64-linux-musl sh
+cache:
+  directories:
+    - ../vcpkg/
 script:
-- docker exec -it musl sh -c "apk add --no-cache curl perl unzip tar make cmake ninja git && /src/vcpkg/bootstrap-vcpkg.sh -useSystemBinaries && cp /src/vcpkg/triplets/x64-linux.cmake /src/vcpkg/triplets/x64-linux-musl.cmake && echo 'set(CMAKE_SYSROOT /x86_64-linux-musl/)'>>/src/vcpkg/scripts/toolchains/linux.cmake && /src/vcpkg/vcpkg install cairo libjpeg-turbo sqlite3 libpng openssl && mkdir /src/collab-vm-server/build/ && cd /src/collab-vm-server/build/ && cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/src/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux-musl .. && cmake --build . --target collab-vm-server && ls -l -a"
+- docker exec -it musl sh -c "apk add --no-cache curl perl unzip tar make cmake ninja git && /src/vcpkg/bootstrap-vcpkg.sh -useSystemBinaries && /src/vcpkg/vcpkg install cairo libjpeg-turbo sqlite3 libpng openssl && mkdir /src/collab-vm-server/build/ && cd /src/collab-vm-server/build/ && cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/src/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux-musl .. && cmake --build . --target collab-vm-server && ls -l -a"
 before_deploy:
   - git tag --force prerelease HEAD
+  - export TRAVIS_TAG=prerelease
 deploy:
   provider: releases
+  tag_name: prerelease
   prerelease: true
   overwrite: true
+  name: Prerelease (unstable)
   file: build/collab-vm-server
   skip_cleanup: true
   on:
