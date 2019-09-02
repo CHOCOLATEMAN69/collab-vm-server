@@ -28,7 +28,7 @@ build_script:
   - cmake --build . --target install --config RelWithDebInfo
   # Vcpkg should automatically copy any necessary DLLs,
   # but it doesn't so manually copy them
-  - ps: cd "$env:APPVEYOR_BUILD_FOLDER/install/"; $missingDLLs = $true; while ($missingDLLs) { $missingDLLs = ls | %{ &'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.21.27702\bin\Hostx86\x86\dumpbin.exe' /dependents /nologo $_.Name } | sls '\S+\.dll' | %{ $_.matches[0].Value } | select -unique | ?{ -not (test-path $_) } | %{ ls C:\Tools\vcpkg\installed\x64-windows\debug\ -rec -incl $_ } | %{ cp $_; $_ } }
+  - ps: $vswhere = join-path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'; $vspath = &$vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath; $vspath = join-path $vspath 'Common7\Tools\vsdevcmd.bat'; $dumpbin = cmd /s /c """$vspath"">nul && where dumpbin.exe"; cd "$env:APPVEYOR_BUILD_FOLDER/install/"; $missingDLLs = $true; while ($missingDLLs) { $missingDLLs = ls | %{ &$dumpbin /dependents /nologo $_.Name } | sls '\S+\.dll' | %{ $_.matches[0].Value } | select -unique | ?{ -not (test-path $_) } | %{ ls C:\Tools\vcpkg\installed\x64-windows\debug\ -rec -incl $_ } | %{ cp $_; $_ } }
 artifacts:
   - path: install/
     name: collab-vm-server
