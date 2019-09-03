@@ -16,7 +16,7 @@ install:
   - git -C C:\Tools\vcpkg\ pull
   - C:\Tools\vcpkg\bootstrap-vcpkg.bat
   # Install dependencies
-  - vcpkg.exe install --triplet %PLATFORM%-windows cairo libjpeg-turbo sqlite-modern-cpp libpng openssl pthreads
+  - vcpkg.exe install --triplet %PLATFORM%-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
   # Upgrade dependencies if they were cached
   - vcpkg.exe upgrade --triplet %PLATFORM%-windows --no-dry-run
 cache: 
