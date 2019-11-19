@@ -1,0 +1,25 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  windows_x64:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup 
+      run: | 
+        git submodule update --init --recursive
+        # Install dependencies
+        vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite-modern-cpp libpng openssl pthreads
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+        cmake --build . --target install --config RelWithDebInfo
+        dir D:\a\collab-vm-server\collab-vm-server\build\tests
+        dir D:\a\collab-vm-server\collab-vm-server\build\tests\RelWithDebInfo
+        dir D:\a\collab-vm-server\collab-vm-server\build\tests\RelWithDebInfo\*.exe
+        exit
