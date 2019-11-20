@@ -10,18 +10,21 @@ jobs:
       - name: Setup
         run: |
           git submodule update --init --recursive
-          sudo apt update
-          sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev
-          vcpkg update
-          vcpkg install openssl cairo libjpeg-turbo sqlite3 libpng
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux .. 
+          # sudo apt update
+          # sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev
+          # vcpkg update
+          # vcpkg install openssl cairo libjpeg-turbo sqlite3 libpng
       - name: Build
         run: |
-          mkdir build
-          mkdir install
-          cd build
-          cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux .. 
-          cmake --build . --target collab-vm-server
-          ls -l -a
+          # mkdir build
+          # mkdir install
+          # cd build
+          # cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux .. 
+          # cmake --build . --target collab-vm-server --config RelWithDebInfo
+          # ls -l -a
 
   windows_x64: # Windows Server 2019 (x64)
     runs-on: windows-latest
