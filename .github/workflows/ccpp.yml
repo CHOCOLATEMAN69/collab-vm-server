@@ -1,69 +1,43 @@
 name: C/C++ CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
-  build:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        name: [windows-2019-vs]
-        include:
-          - name: ubuntu-18.04-gcc-8
-            os: ubuntu-18.04
-            compiler: gcc
-            version: "8"
-          - name: windows-2019-vs
-            os: windows-2019
-            compiler: cl
-          - name: windows-2019-clang
-            os: windows-2019
-            compiler: clang
-          - name: windows-2019-gcc
-            os: windows-2019
-            compiler: gcc
-
+  linux_x64: # Ubuntu 18.04 (x64)
+    runs-on: ubuntu-18.04
+    steps: 
+      - uses: actions/checkout@v1
+      - name: Setup
+        run: |
+          git submodule update --init --recursive
+          sudo apt update
+          sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev gcc-8 g++-8
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+          vcpkg update
+          vcpkg install openssl cairo libjpeg-turbo sqlite3 libpng
+      - name: Build
+        run: |
+          mkdir build
+          mkdir install
+          cd build
+          cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux .. 
+          cmake --build . --target collab-vm-server
+          ls -l -a
+  windows_x64: # Windows Server 2019 (x64)
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
-      with:
-        submodules: true
-
-    - name: Initalization
-      run: mkdir build
-    
-    # Windows
-    - name: Install and Compile (Windows x64, Visual Studio 2019)
-      if: startsWith(matrix.os, 'windows-2019')
-      shell: powershell
-      run: |
-        mkdir install
-        vcpkg update
+    - name: Setup 
+      run: | 
+        git submodule update --init --recursive
+        # Install dependencies
         vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
+    - name: Build
+      run: |
+        mkdir build
+        mkdir install
         cd build
         cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-        cmake --build . --target install --config RelWithDebInfo 
+        cmake --build . --target install --config RelWithDebInfo
         dir D:\a\collab-vm-server\collab-vm-server\install
         exit
-    
-    # Unsupported
-    #- name: Install and Compile (Windows x64, Clang)
-    #  if: startsWith(matrix.name, 'windows-2019-clang')
-    #  shell: powershell
-    #  run: |
-    #    mkdir install
-    #    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-    #    scoop install llvm --global
-    #    clang --version
-    #    exit
-
-    #- name: Install and Compile (Windows x64, GCC)
-    #  if: startsWith(matrix.name, 'windows-2019-gcc')
-    #  shell: powershell
-    #  run: |
-    #    mkdir install
-    #    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-    #    scoop install gcc --global
-    #    gcc --version
-    #    exit
