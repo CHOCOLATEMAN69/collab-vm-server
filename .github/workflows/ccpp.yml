@@ -1,70 +1,54 @@
-name: CollabVM Server 2.0 CI
+name: C/C++ CI
 
 on: [push, pull_request]
 
 jobs:
-  build: 
+  build:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    
     strategy:
-       fail-fast: false
-       matrix:
-         name: [ubuntu-18.04-gcc-8, windows-2019-cl]
-       include:
-         - name: ubuntu-18.04-gcc-8
-           os: ubuntu-18.04
-           compiler: gcc
-           version: "8"
-         - name: windows-2019-cl
-           os: windows-2019
-           compiler: cl
-           
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04]
+        include:
+        - name: ubuntu-18.04-gcc-8
+          os:  ubuntu-18.04
+          compiler: gcc
+          version: "8"
+        - name: windows-2019-vs
+          os: windows-2019
+          compiler: cl
+        
     steps:
       - uses: actions/checkout@v1
         with:
           submodules: true
           
-    - name: Compilation (Windows x64)
-      if: startsWith(matrix.os, 'windows')
-      shell: powershell
-      run: |
-        mkdir build
-        mkdir install
-        if [ "${{ matrix.compiler }}" = "cl" ]; then
+      - name: Compilation (Windows x64)
+        if: startsWith(matrix.os, 'windows')
+        shell: powershell
+        run: |
+          mkdir build
+          mkdir install
           vcpkg update
           vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
-          cd build 
-          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-          cmake --build . --target install --config RelWithDebInfo 
-          dir D:\a\collab-vm-server\collab-vm-server\install
-          exit
-        else if [ "${{ matrix.compiler }}" = "clang" ]; then
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-          scoop install llvm --global
-          clang --version
-          exit 
-        else 
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-          scoop install gcc --global
-          echo "::set-env name=CC::gcc"
-          echo "::set-env name=CXX::g++"
-          gcc --version
-          exit 
-        fi
-
-    - name: Compilation (Ubuntu 18.04 x64)
-      if: startsWith(matrix.os, 'ubuntu')
-      run: |
-        mkdir build
-        sudo apt update
-        sudo apt install -y cmake curl perl unzip tar make ninja-build build-essential zlib1g-dev
-        if [ "${{ matrix.compiler }}" = "gcc" ]; then
-          sudo apt install -y gcc-${{ matrix.version }} g++-${{ matrix.version }}
-          echo ::set-env name=CC::gcc-${{ matrix.version }}
-          echo ::set-env name=CXX::g++-${{ matrix.version }}
-        else
-          echo "not supported yet"
-          exit
-        fi
-        exit
+          cd build
+          if ("${{ matrix.compiler }}".StartsWith("vs")) {
+            cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+            cmake --build . --target install --config RelWithDebInfo 
+            dir D:\a\collab-vm-server\collab-vm-server\install
+            exit
+          }
+          
+          if ("${{ matrix.compiler }}".StartsWith("clang")) {
+            Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+            scoop install llvm --global
+            clang --version
+            exit
+          }
+          
+          if ("${{ matrix.compiler }}" -eq "gcc") {
+            Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+            scoop install gcc --global
+            gcc --version
+            exit
+          }
