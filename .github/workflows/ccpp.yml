@@ -14,31 +14,25 @@ jobs:
         ubuntu-18.04-gcc-8, # Ubuntu 18.04 (GCC 8)
         windows-2019-cl # Windows Server 2019 (Visual Studio)
        ]
-       
        include:
          - name: ubuntu-18.04-gcc-8
            os: ubuntu-18.04
            compiler: gcc
            version: "8"
-           
          - name: windows-2019-cl
            os: windows-2019
            compiler: cl
-           
     steps:
       - uses: actions/checkout@v1
         with:
           submodules: true
           
-    - name: Initalization
-      
     - name: Compilation (Windows x64)
       if: startsWith(matrix.os, 'windows')
       shell: powershell
       run: |
         mkdir build
         mkdir install
-        
         if [ "${{ matrix.compiler }}" = "cl" ]; then
           vcpkg update
           vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
