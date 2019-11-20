@@ -8,13 +8,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     strategy:
-      fail-fast: false
-      matrix:
-        name: [
-          ubuntu-18.04-gcc-8,
-          windows-2019-cl,
-        ]
-        
+       fail-fast: false
+       matrix:
+         name: [ubuntu-18.04-gcc-8, windows-2019-cl]
        include:
          - name: ubuntu-18.04-gcc-8
            os: ubuntu-18.04
