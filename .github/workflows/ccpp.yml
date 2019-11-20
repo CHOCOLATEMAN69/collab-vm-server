@@ -7,48 +7,34 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-2019-vs]
+        name: [windows-2019-vs]
         include:
-        - name: ubuntu-18.04-gcc-8
-          os:  ubuntu-18.04
-          compiler: gcc
-          version: "8"
-        - name: windows-2019-vs
-          os: windows-2019
-          compiler: cl
-        
+          - name: ubuntu-18.04-gcc-8
+            os: ubuntu-18.04
+            compiler: gcc
+            version: "8"
+          - name: windows-2019-vs
+            os: windows-2019
+            compiler: cl
     steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: true
-          
-      - name: Compilation (Windows x64)
-        if: startsWith(matrix.os, 'windows')
-        shell: powershell
-        run: |
-          mkdir build
-          mkdir install
-          vcpkg update
-          vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
-          cd build
-          if ("${{ matrix.compiler }}".StartsWith("vs")) {
-            cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-            cmake --build . --target install --config RelWithDebInfo 
-            dir D:\a\collab-vm-server\collab-vm-server\install
-            exit
-          }
-          
-          if ("${{ matrix.compiler }}".StartsWith("clang")) {
-            Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-            scoop install llvm --global
-            clang --version
-            exit
-          }
-          
-          if ("${{ matrix.compiler }}" -eq "gcc") {
-            Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-            scoop install gcc --global
-            gcc --version
-            exit
-          }
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+
+    - name: Initalization
+      run: mkdir build
+
+    - name: Install (Windows)
+      if: startsWith(matrix.os, 'windows')
+      shell: powershell
+      run: |
+        mkdir install
+        vcpkg update
+        vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
+        cd build
+        cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+        cmake --build . --target install --config RelWithDebInfo 
+        dir D:\a\collab-vm-server\collab-vm-server\install
+        exit
