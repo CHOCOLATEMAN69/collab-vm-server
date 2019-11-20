@@ -18,6 +18,12 @@ jobs:
           - name: windows-2019-vs
             os: windows-2019
             compiler: cl
+          - name: windows-2019-clang
+            os: windows-2019
+            compiler: clang
+          - name: windows-2019-gcc
+            os: windows-2019
+            compiler: gcc
     steps:
     - uses: actions/checkout@v1
       with:
@@ -25,9 +31,10 @@ jobs:
 
     - name: Initalization
       run: mkdir build
-
-    - name: Install (Windows)
-      if: startsWith(matrix.os, 'windows')
+    
+    # Windows
+    - name: Install and Compile (Windows x64, Visual Studio 2019)
+      if: startsWith(matrix.os, 'windows-2019-vs')
       shell: powershell
       run: |
         mkdir install
@@ -38,3 +45,25 @@ jobs:
         cmake --build . --target install --config RelWithDebInfo 
         dir D:\a\collab-vm-server\collab-vm-server\install
         exit
+    
+    # Debug/Unsupported methods
+    - name: Install and Compile (Windows x64, Clang)
+      if: startsWith(matrix.os, 'windows-2019-clang')
+      shell: powershell
+      run: |
+        mkdir install
+        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+        scoop install llvm --global
+        clang --version
+        exit
+
+    - name: Install and Compile (Windows x64, GCC)
+      if: startsWith(matrix.os, 'windows-2019-gcc')
+      shell: powershell
+      run: |
+        mkdir install
+        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+        scoop install gcc --global
+        gcc --version
+        exit
+    
