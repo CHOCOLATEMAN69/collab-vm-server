@@ -12,7 +12,7 @@ jobs:
       run: | 
         git submodule update --init --recursive
         # Install dependencies
-        vcpkg install --triplet x64-windows cairo libjpeg-turbo libpng openssl pthreads
+        vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
     - name: Build
       run: |
         mkdir build
