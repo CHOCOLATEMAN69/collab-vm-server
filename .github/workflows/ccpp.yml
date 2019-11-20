@@ -1,47 +1,78 @@
-name: C/C++ CI
+name: CollabVM Server 2.0 CI
 
-on: [push]
+on: push
 
 jobs:
-  linux_x64: # Ubuntu 18.04 (x64)
-    runs-on: ubuntu-18.04
-    steps: 
-      - uses: actions/checkout@v1
-      - name: Setup
-        run: |
-          gcc --version 
-          # git submodule update --init --recursive
-          # mkdir build
-          # cd build
-          # sudo apt update
-          # sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev gperf
-          # cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake  -DVCPKG_TARGET_TRIPLET=x64-linux ..
-          # vcpkg update
-          # vcpkg install openssl cairo libjpeg-turbo sqlite3 libpng
-      - name: Build
-        run: |
-          # mkdir build
-          # mkdir install
-          # cd build
-          # cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux .. 
-          # cmake --build . --target collab-vm-server --config RelWithDebInfo
-          # ls -l -a
-
-  windows_x64: # Windows Server 2019 (x64)
-    runs-on: windows-latest
+  build: 
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ # Ignore the error here if you're using the web interface, its fine
+        ubuntu-18.04-gcc-8, # Ubuntu 18.04 (GCC 8)
+        windows-2019-cl # Windows Server 2019 (Visual Studio)
+       ]
+       
+       include:
+         - name: ubuntu-18.04-gcc-8
+           os: ubuntu-18.04
+           compiler: gcc
+           version: "8"
+           
+         - name: windows-2019-cl
+           os: windows-2019
+           compiler: cl
+           
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup 
-      run: | 
-        git submodule update --init --recursive
-        # Install dependencies
-        vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
-    - name: Build
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+          
+    - name: Initalization
+      
+    - name: Compilation (Windows x64)
+      if: startsWith(matrix.os, 'windows')
+      shell: powershell
       run: |
         mkdir build
         mkdir install
-        cd build
-        cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-        cmake --build . --target install --config RelWithDebInfo
-        dir D:\a\collab-vm-server\collab-vm-server\install
+        
+        if [ "${{ matrix.compiler }}" = "cl" ]; then
+          vcpkg update
+          vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
+          cd build 
+          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+          cmake --build . --target install --config RelWithDebInfo 
+          dir D:\a\collab-vm-server\collab-vm-server\install
+          exit
+        else if [ "${{ matrix.compiler }}" = "clang" ]; then
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          scoop install llvm --global
+          clang --version
+          exit 
+        else 
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          scoop install gcc --global
+          echo "::set-env name=CC::gcc"
+          echo "::set-env name=CXX::g++"
+          gcc --version
+          exit 
+        fi
+
+    - name: Compilation (Ubuntu 18.04 x64)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        mkdir build
+        sudo apt update
+        sudo apt install -y cmake curl perl unzip tar make ninja-build build-essential zlib1g-dev
+        if [ "${{ matrix.compiler }}" = "gcc" ]; then
+          sudo apt install -y gcc-${{ matrix.version }} g++-${{ matrix.version }}
+          echo ::set-env name=CC::gcc-${{ matrix.version }}
+          echo ::set-env name=CXX::g++-${{ matrix.version }}
+        else
+          echo "not supported yet"
+          exit
+        fi
         exit
