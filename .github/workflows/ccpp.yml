@@ -1,6 +1,6 @@
 name: CollabVM Server 2.0 CI
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build: 
@@ -10,10 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ # Ignore the error here if you're using the web interface, its fine
-        ubuntu-18.04-gcc-8, # Ubuntu 18.04 (GCC 8)
-        windows-2019-cl # Windows Server 2019 (Visual Studio)
-       ]
+        name: [
+          ubuntu-18.04-gcc-8,
+          windows-2019-cl,
+        ]
+        
        include:
          - name: ubuntu-18.04-gcc-8
            os: ubuntu-18.04
@@ -22,6 +23,7 @@ jobs:
          - name: windows-2019-cl
            os: windows-2019
            compiler: cl
+           
     steps:
       - uses: actions/checkout@v1
         with:
