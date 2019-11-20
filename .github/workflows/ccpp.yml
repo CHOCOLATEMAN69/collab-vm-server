@@ -9,14 +9,15 @@ jobs:
       - uses: actions/checkout@v1
       - name: Setup
         run: |
-          git submodule update --init --recursive
-          cp /usr/local/share/vcpkg/triplets/x64-linux.cmake /usr/local/share/vcpkg/triplets/x64-linux-musl.cmake 
-          echo 'set(CMAKE_SYSROOT /x86_64-linux-musl/)' >> /usr/local/share/vcpkg/scripts/toolchains/linux.cmake
-          sed -i -e '/RPATH/d' submodules/FreeRDP/CMakeLists.txt
-          sudo apt update
-          sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev
-          vcpkg update
-          vcpkg install cairo libjpeg-turbo sqlite3 libpng openssl
+          # git submodule update --init --recursive
+          # cp /usr/local/share/vcpkg/triplets/x64-linux.cmake /usr/local/share/vcpkg/triplets/x64-linux-musl.cmake 
+          # echo 'set(CMAKE_SYSROOT /x86_64-linux-musl/)' >> /usr/local/share/vcpkg/scripts/toolchains/linux.cmake
+          # sed -i -e '/RPATH/d' submodules/FreeRDP/CMakeLists.txt
+          # sudo apt update
+          # sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev
+          # vcpkg update
+          # vcpkg install cairo libjpeg-turbo sqlite3 libpng openssl
+          vcpkg install openssl && cat /usr/local/share/vcpkg/buildtrees/openssl-unix/install-x64-linux-dbg-out.log
       - name: Build
         run: |
           mkdir build
