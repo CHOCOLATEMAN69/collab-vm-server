@@ -3,7 +3,7 @@ name: C/C++ CI
 on: [push]
 
 jobs:
-  linux_x64: # Ubuntu 18.04
+  linux_x64: # Ubuntu 18.04 (x64)
     runs-on: ubuntu-18.04
     steps: 
       - uses: actions/checkout@v1
@@ -25,9 +25,19 @@ jobs:
           cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux-musl .. && cmake --build . --target collab-vm-server
           ls -l -a
           
+  mac_x64: # macOS 10.14 Mojave (x64)
+    runs-on: macOS-10.14
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup
+      run: |
+        which git
+        which vcpkg
+        which cmake
+        which brew
+        
   windows_x64: # Windows Server 2019 (x64)
     runs-on: windows-latest
-    
     steps:
     - uses: actions/checkout@v1
     - name: Setup 
