@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019-vs, ubuntu-18.04-gcc-8]
+        os: [windows-2019, ubuntu-18.04]
         include:
         - name: ubuntu-18.04-gcc-8
           os:  ubuntu-18.04
