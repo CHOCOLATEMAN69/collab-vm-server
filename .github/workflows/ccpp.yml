@@ -31,10 +31,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Setup
       run: |
-        which git
-        which vcpkg
-        which cmake
-        which brew
+        which git && which vcpkg && && which cmake && which brew && exit
         
   windows_x64: # Windows Server 2019 (x64)
     runs-on: windows-latest
