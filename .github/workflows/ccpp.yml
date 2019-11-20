@@ -12,6 +12,7 @@ jobs:
           git submodule update --init --recursive
           mkdir build
           cd build
+          sudo apt install -y gperf
           cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_CXX_FLAGS='-static -static-libgcc -static-libstdc++' -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux .. 
           # sudo apt update
           # sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev
