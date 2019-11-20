@@ -1,21 +1,24 @@
-name: C/C++ CI
+name: CollabVM Server 2 CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   linux_x64: # Ubuntu 18.04 (x64)
     runs-on: ubuntu-18.04
     steps: 
       - uses: actions/checkout@v1
+        with: 
+          submodules: true
       - name: Setup
+        shell: bash
         run: |
-          git submodule update --init --recursive
           sudo apt update
-          sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev gcc-8 g++-8
+          sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev libwinpr2-dev gcc-8 g++-8 
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
           vcpkg update
           vcpkg install openssl cairo libjpeg-turbo sqlite3 libpng
       - name: Build
+        shell: bash
         run: |
           mkdir build
           mkdir install
@@ -26,18 +29,23 @@ jobs:
   windows_x64: # Windows Server 2019 (x64)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup 
-      run: | 
-        git submodule update --init --recursive
-        # Install dependencies
-        vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
-    - name: Build
-      run: |
-        mkdir build
-        mkdir install
-        cd build
-        cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-        cmake --build . --target install --config RelWithDebInfo
-        dir D:\a\collab-vm-server\collab-vm-server\install
-        exit
+      - uses: actions/checkout@
+        with: 
+          submodules: true
+      - name: Setup 
+        shell: powershell
+        run: | 
+          git submodule update --init --recursive
+          # Install dependencies
+          vcpkg update
+          vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
+      - name: Build
+        shell: powershell
+        run: |
+          mkdir build
+          mkdir install
+          cd build
+          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+          cmake --build . --target install --config RelWithDebInfo
+          dir D:\a\collab-vm-server\collab-vm-server\install
+          exit
