@@ -24,6 +24,7 @@ jobs:
           - name: windows-2019-gcc
             os: windows-2019
             compiler: gcc
+
     steps:
     - uses: actions/checkout@v1
       with:
@@ -34,7 +35,7 @@ jobs:
     
     # Windows
     - name: Install and Compile (Windows x64, Visual Studio 2019)
-      if: startsWith(matrix.name, 'windows-2019-vs')
+      if: startsWith(matrix.os, 'windows-2019')
       shell: powershell
       run: |
         mkdir install
@@ -47,23 +48,22 @@ jobs:
         exit
     
     # Unsupported
-    - name: Install and Compile (Windows x64, Clang)
-      if: startsWith(matrix.name, 'windows-2019-clang')
-      shell: powershell
-      run: |
-        mkdir install
-        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-        scoop install llvm --global
-        clang --version
-        exit
+    #- name: Install and Compile (Windows x64, Clang)
+    #  if: startsWith(matrix.name, 'windows-2019-clang')
+    #  shell: powershell
+    #  run: |
+    #    mkdir install
+    #    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+    #    scoop install llvm --global
+    #    clang --version
+    #    exit
 
-    - name: Install and Compile (Windows x64, GCC)
-      if: startsWith(matrix.name, 'windows-2019-gcc')
-      shell: powershell
-      run: |
-        mkdir install
-        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-        scoop install gcc --global
-        gcc --version
-        exit
-    
+    #- name: Install and Compile (Windows x64, GCC)
+    #  if: startsWith(matrix.name, 'windows-2019-gcc')
+    #  shell: powershell
+    #  run: |
+    #    mkdir install
+    #    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+    #    scoop install gcc --global
+    #    gcc --version
+    #    exit
