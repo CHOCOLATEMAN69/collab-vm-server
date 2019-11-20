@@ -13,10 +13,7 @@ jobs:
           sudo apt update
           sudo apt install -y curl perl unzip tar make ninja-build build-essential zlib1g-dev
           vcpkg update
-          vcpkg install openssl 
-          cp /usr/local/share/vcpkg/triplets/x64-linux.cmake /usr/local/share/vcpkg/triplets/x64-linux-musl.cmake 
-          echo 'set(CMAKE_SYSROOT /x86_64-linux-musl/)' >> /usr/local/share/vcpkg/scripts/toolchains/linux.cmake
-          vcpkg install cairo libjpeg-turbo sqlite3 libpng
+          vcpkg install openssl cairo libjpeg-turbo sqlite3 libpng
           sed -i -e '/RPATH/d' submodules/FreeRDP/CMakeLists.txt
       - name: Build
         run: |
