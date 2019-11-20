@@ -15,7 +15,7 @@ jobs:
           sed -i -e '/RPATH/d' submodules/FreeRDP/CMakeLists.txt
           sudo apt update
           sudo apt install -y curl perl unzip tar make
-          vcpkg install cairo libjpeg-turbo sqlite3 libpng openssl
+          sudo vcpkg install cairo libjpeg-turbo sqlite3 libpng openssl
       - name: Build
         run: |
           mkdir build
