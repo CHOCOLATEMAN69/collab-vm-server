@@ -34,7 +34,7 @@ jobs:
     
     # Windows
     - name: Install and Compile (Windows x64, Visual Studio 2019)
-      if: startsWith(matrix.os, 'windows-2019-vs')
+      if: startsWith(matrix.name, 'windows-2019-vs')
       shell: powershell
       run: |
         mkdir install
@@ -46,9 +46,9 @@ jobs:
         dir D:\a\collab-vm-server\collab-vm-server\install
         exit
     
-    # Debug/Unsupported methods
+    # Unsupported
     - name: Install and Compile (Windows x64, Clang)
-      if: startsWith(matrix.os, 'windows-2019-clang')
+      if: startsWith(matrix.name, 'windows-2019-clang')
       shell: powershell
       run: |
         mkdir install
@@ -58,7 +58,7 @@ jobs:
         exit
 
     - name: Install and Compile (Windows x64, GCC)
-      if: startsWith(matrix.os, 'windows-2019-gcc')
+      if: startsWith(matrix.name, 'windows-2019-gcc')
       shell: powershell
       run: |
         mkdir install
