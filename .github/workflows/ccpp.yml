@@ -37,7 +37,7 @@ jobs:
           tag_name: prerelease
           release_name: Release ${{github.ref}}
           body: |
-            This is a test pre-release for CollabVM Server 2.
+            This is pre-release for CollabVM Server 2
           draft: false
           prerelease: false
       - name: Deploy Release
