@@ -16,14 +16,17 @@ jobs:
           git submodule update --init --recursive
           # Install dependencies
           vcpkg update
-          # vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
+          vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
       - name: Build
         id: build
         shell: powershell
         run: |
-          # fuck you github actions 
-          Invoke-WebRequest https://github.com/Cosmic-Sans/collab-vm-server/archive/prerelease.zip -OutFile prerelease.zip
-          dir 
+          mkdir build
+          mkdir install
+          cd build
+          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+          cmake --build . --target install --config RelWithDebInfo
+          Compress-Archive -Path D:\a\collab-vm-server\collab-vm-server\install\ -DestinationPath collab-vm-win64.zip
           exit
       - name: Create Release
         id: create_release
@@ -44,6 +47,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with: 
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: prerelease.zip
-          asset_name: prerelease.zip
+          asset_path: collab-vm-win64.zip
+          asset_name: collab-vm-win64.zip
           asset_content_type: application/zip
