@@ -26,7 +26,7 @@ jobs:
           cd build
           cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=D:/a/collab-vm-server/collab-vm-server/install/ -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
           cmake --build . --target install --config RelWithDebInfo
-          Compress-Archive -Path D:\a\collab-vm-server\collab-vm-server\install\ -DestinationPath D:\a\collab-vm-server\collab-vm-server\install\collab-vm-win64.zip
+          Compress-Archive -Path D:\a\collab-vm-server\collab-vm-server\install\ -DestinationPath collab-vm-win64.zip
           exit
       - name: Create Release
         id: create_release
