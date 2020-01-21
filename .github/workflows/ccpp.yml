@@ -16,7 +16,7 @@ jobs:
           git submodule update --init --recursive
           # Install dependencies
           vcpkg update
-          vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
+          # vcpkg install --triplet x64-windows cairo libjpeg-turbo sqlite3 libpng openssl pthreads
       - name: Build
         id: build
         shell: powershell
